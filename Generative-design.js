@@ -3,15 +3,18 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 let context = canvas.getContext("2d");
 
-let canvasHeight = context.canvas.height;
-let canvasWidth = context.canvas.width;
-
 document.body.style.overflow = "hidden";
+
+window.addEventListener("resize", () => {
+	canvas.width = context.canvas.height;
+	canvas.height = context.canvas.width;
+	generateDesign();
+});
 
 function randomColor() {
 	let h = Math.floor(Math.random() * 360);
-	let s = 70 + Math.floor(Math.random() * 30);
-	let l = 80 + Math.floor(Math.random() * 20);
+	let s = 50 + Math.floor(Math.random() * 20);
+	let l = 50 + Math.floor(Math.random() * 30);
 	return hsl(h, s, l);
 }
 
@@ -25,39 +28,18 @@ function drawRandomCircle(x, y, maxRadius) {
 	context.arc(x, y, radius, 0, Math.PI * 2);
 	context.fillStyle = randomColor();
 	context.fill();
+	context.globalAlpha = 0.3;
 }
 
-function drawRandomRectangle(x, y, maxWidth, maxHeight) {
-	let width = Math.random() * maxWidth;
-	let height = Math.random() * maxHeight;
-	context.fillStyle = randomColor();
-	context.fillRect(x, y, width, height);
-}
-
+generateDesign();
 function generateDesign() {
-	let shapeCount = 6000;
+	let shapeCount = 1500;
 	for (let i = 0; i < shapeCount; i++) {
 		let x = Math.random() * canvas.width;
 		let y = Math.random() * canvas.height;
 
-		// Relatieve afmetingen
-		let maxCircleRadius = canvas.width * 0.03;
-		let maxRectangleWidth = canvas.width * 0.08;
-		let maxRectangleHeight = canvas.height * 0.08;
+		let maxCircleRadius = canvas.width * 0.05;
 
-		if (Math.random() > 0.5) {
-			drawRandomCircle(x, y, maxCircleRadius);
-		} else {
-			drawRandomRectangle(x, y, maxRectangleWidth, maxRectangleHeight);
-		}
+		drawRandomCircle(x, y, maxCircleRadius);
 	}
 }
-
-generateDesign();
-
-window.addEventListener("resize", () => {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	generateDesign();
-});
-document.body.style.overflow = "hidden";
