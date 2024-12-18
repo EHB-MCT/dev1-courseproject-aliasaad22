@@ -3,13 +3,9 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 let context = canvas.getContext("2d");
 
-let mouse = { x: 0, y: 0 };
-let circles = [];
-
 window.addEventListener("resize", () => {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-	circles = createCircles(500);
 	generateDesign();
 });
 
@@ -29,31 +25,32 @@ function drawRandomCircle(x, y, maxRadius) {
 	context.beginPath();
 	context.arc(x, y, radius, 0, Math.PI * 2);
 	context.fillStyle = randomColor();
-	context.fill();
 	context.globalAlpha = 0.3;
+	context.fill();
 }
 
 function generateDesign() {
+	context.clearRect(0, 0, canvas.width, canvas.height);
 	let shapeCount = 1500;
 	for (let i = 0; i < shapeCount; i++) {
 		let x = Math.random() * canvas.width;
 		let y = Math.random() * canvas.height;
-
 		let maxCircleRadius = canvas.width * 0.05;
-
 		drawRandomCircle(x, y, maxCircleRadius);
 	}
 }
 
+let circles = [];
 function createCircles(count) {
+	circles = [];
 	for (let i = 0; i < count; i++) {
 		let circle = {
 			x: Math.random() * canvas.width,
 			y: Math.random() * canvas.height,
 			radius: Math.random() * (canvas.width * 0.05),
 			color: randomColor(),
-			speedX: 0,
-			speedY: 0,
+			speedX: (Math.random() - 0.5) * 2,
+			speedY: (Math.random() - 0.5) * 2,
 		};
 		circles.push(circle);
 	}
@@ -61,31 +58,29 @@ function createCircles(count) {
 
 function updateCircles() {
 	for (let circle of circles) {
+		circle.x += circle.speedX;
+		circle.y += circle.speedY;
+
+		if (
+			circle.x - circle.radius < 0 ||
+			circle.x + circle.radius > canvas.width
+		) {
+			circle.speedX *= -1;
+		}
+		if (
+			circle.y - circle.radius < 0 ||
+			circle.y + circle.radius > canvas.height
+		) {
+			circle.speedY *= -1;
+		}
+
 		const dx = circle.x - mouse.x;
 		const dy = circle.y - mouse.y;
 		const distance = Math.sqrt(dx * dx + dy * dy);
 
-		if (distance < circle.radius) {
-			if (circle.speedX === 0 && circle.speedY === 0) {
-				circle.speedX = (Math.random() - 0.5) * 4;
-				circle.speedY = (Math.random() - 0.5) * 4;
-			}
-
-			circle.x += circle.speedX;
-			circle.y += circle.speedY;
-
-			if (
-				circle.x - circle.radius < 0 ||
-				circle.x + circle.radius > canvas.width
-			) {
-				circle.speedX *= -1;
-			}
-			if (
-				circle.y - circle.radius < 0 ||
-				circle.y + circle.radius > canvas.height
-			) {
-				circle.speedY *= -1;
-			}
+		if (distance < 100) {
+			circle.speedX += (dx / distance) * 0.1;
+			circle.speedY += (dy / distance) * 0.1;
 		}
 	}
 }
@@ -95,10 +90,16 @@ function drawCircles() {
 		context.beginPath();
 		context.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
 		context.fillStyle = circle.color;
-		context.globalAlpha = 0.8;
+		context.globalAlpha = 0.6;
 		context.fill();
 	}
 }
+
+let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+canvas.addEventListener("mousemove", function (event) {
+	mouse.x = event.clientX;
+	mouse.y = event.clientY;
+});
 
 function animate() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
@@ -107,11 +108,6 @@ function animate() {
 	requestAnimationFrame(animate);
 }
 
-canvas.addEventListener("mousemove", (event) => {
-	mouse.x = event.clientX;
-	mouse.y = event.clientY;
-});
-
-createCircles(500);
 generateDesign();
+createCircles(500);
 animate();
