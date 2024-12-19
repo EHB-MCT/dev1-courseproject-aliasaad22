@@ -6,8 +6,40 @@ let context = canvas.getContext("2d");
 window.addEventListener("resize", () => {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
+	updateSignaturePosition();
 	generateDesign();
+	createCircles(500);
 });
+
+let signaturePosition = { x: canvas.width - 375, y: canvas.height - 375 };
+
+function updateSignaturePosition() {
+	signaturePosition.x = canvas.width - 375;
+	signaturePosition.y = canvas.height - 375;
+}
+
+signature();
+
+function signature() {
+	let { x, y } = signaturePosition;
+
+	context.fillStyle = "black";
+	context.fillRect(x, y, 350, 350);
+	context.fillStyle = "#da8350";
+	context.fillRect(x + 75, y + 25, 200, 200);
+
+	context.fillStyle = "black";
+	context.fillRect(x + 140, y + 90, 70, 70);
+	context.fillStyle = "#da8350";
+	context.fillRect(x + 25, y + 225, 50, 50);
+	context.fillRect(x + 25, y + 275, 50, 50);
+	context.fillRect(x + 75, y + 275, 50, 50);
+	context.fillRect(x + 125, y + 275, 50, 50);
+	context.fillRect(x + 175, y + 275, 50, 50);
+	context.fillRect(x + 225, y + 275, 50, 50);
+	context.fillRect(x + 275, y + 275, 50, 50);
+	context.fillRect(x + 275, y + 225, 50, 50);
+}
 
 function randomColor() {
 	let h = Math.floor(Math.random() * 360);
@@ -52,6 +84,17 @@ function createCircles(count) {
 			speedX: (Math.random() - 0.5) * 2,
 			speedY: (Math.random() - 0.5) * 2,
 		};
+
+		if (
+			circle.x + circle.radius > signaturePosition.x &&
+			circle.x - circle.radius < signaturePosition.x + 350 &&
+			circle.y + circle.radius > signaturePosition.y &&
+			circle.y - circle.radius < signaturePosition.y + 350
+		) {
+			i--;
+			continue;
+		}
+
 		circles.push(circle);
 	}
 }
@@ -71,6 +114,16 @@ function updateCircles() {
 			circle.y - circle.radius < 0 ||
 			circle.y + circle.radius > canvas.height
 		) {
+			circle.speedY *= -1;
+		}
+
+		if (
+			circle.x + circle.radius > signaturePosition.x &&
+			circle.x - circle.radius < signaturePosition.x + 350 &&
+			circle.y + circle.radius > signaturePosition.y &&
+			circle.y - circle.radius < signaturePosition.y + 350
+		) {
+			circle.speedX *= -1;
 			circle.speedY *= -1;
 		}
 
@@ -105,9 +158,11 @@ function animate() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	updateCircles();
 	drawCircles();
+	signature();
 	requestAnimationFrame(animate);
 }
 
+updateSignaturePosition();
 generateDesign();
 createCircles(500);
 animate();
